@@ -244,3 +244,9 @@ class Module:
                          (verse.text(), verse.book_number(), verse.chapter(), verse.verse())
                         )
         self.connection.commit()
+
+    def __del__(self):
+        self.connection.close()
+
+module = Module("RST+.SQLite3")
+module.strip_tags()
