@@ -123,59 +123,94 @@ class Verse:
         return self.text_
 
 
-def parse_books(filename) -> List[Book]:
-    con = sqlite3.connect(filename)
-    con.row_factory = sqlite3.Row
-    cur = con.cursor()
+class Module:
+    def __init__(self, filename):
+        self.filename_ = filename
 
-    cursor = cur.execute('SELECT * FROM books LIMIT 1')
-    query_fields = [description[0] for description in cur.description]
-    cur.execute(f"SELECT {', '.join(query_fields)} FROM books")
+        self.books_ = None
+        self.books_all_ = None
+        self.verses_ = None
 
-    result = []
-    for row in cur.fetchall():
-        result.append(Book(**{key: row[key] for key in row.keys()}))
+        self.info_ = None
 
-    return result
+    def __parse_books(filename) -> List[Book]:
+        con = sqlite3.connect(filename)
+        con.row_factory = sqlite3.Row
+        cur = con.cursor()
 
+        cursor = cur.execute('SELECT * FROM books LIMIT 1')
+        query_fields = [description[0] for description in cur.description]
+        cur.execute(f"SELECT {', '.join(query_fields)} FROM books")
 
-def parse_books_all(filename) -> List[Book]:
-    con = sqlite3.connect(filename)
-    con.row_factory = sqlite3.Row
-    cur = con.cursor()
+        result = []
+        for row in cur.fetchall():
+            result.append(Book(**{key: row[key] for key in row.keys()}))
 
-    cursor = cur.execute('SELECT * FROM books LIMIT 1')
-    query_fields = [description[0] for description in cur.description]
-    cur.execute(f"SELECT {', '.join(query_fields)} FROM books_all")
-
-    result = []
-    for row in cur.fetchall():
-        result.append(Book(**{key: row[key] for key in row.keys()}))
-
-    return result
+        return result
 
 
-def parse_info(filename) -> Info:
-    con = sqlite3.connect(filename)
-    con.row_factory = sqlite3.Row
-    cur = con.cursor()
+    def __parse_books_all(filename) -> List[Book]:
+        con = sqlite3.connect(filename)
+        con.row_factory = sqlite3.Row
+        cur = con.cursor()
 
-    cur.execute("SELECT name, value FROM info")
-    return Info(
-        **{
-            name: value for (name, value) in cur.fetchall()
-        }
-    )
+        cursor = cur.execute('SELECT * FROM books LIMIT 1')
+        query_fields = [description[0] for description in cur.description]
+        cur.execute(f"SELECT {', '.join(query_fields)} FROM books_all")
+
+        result = []
+        for row in cur.fetchall():
+            result.append(Book(**{key: row[key] for key in row.keys()}))
+
+        return result
 
 
-def parse_verses(filename) -> List[Verse]:
-    con = sqlite3.connect(filename)
-    cur = con.cursor()
-    cur.execute("SELECT book_number, chapter, verse, text"
-                " FROM verses")
-    
-    result = []
-    for (book_number, chapter, verse, text) in cur.fetchall():
-        result.append(Verse(book_number, chapter, verse, text))
-    
-    return result
+    def __parse_info(filename) -> Info:
+        con = sqlite3.connect(filename)
+        con.row_factory = sqlite3.Row
+        cur = con.cursor()
+
+        cur.execute("SELECT name, value FROM info")
+        return Info(
+            **{
+                name: value for (name, value) in cur.fetchall()
+            }
+        )
+
+
+    def __parse_verses(filename) -> List[Verse]:
+        con = sqlite3.connect(filename)
+        cur = con.cursor()
+        cur.execute("SELECT book_number, chapter, verse, text"
+                    " FROM verses")
+        
+        result = []
+        for (book_number, chapter, verse, text) in cur.fetchall():
+            result.append(Verse(book_number, chapter, verse, text))
+        
+        return result
+
+    def filename() -> str:
+        return self.filename_
+
+    def info() -> Info:
+        if self.info_:
+            return self.info_
+        self.info_ = self.__parse_info()
+        return self.info_
+
+    def books() -> List[Book]:
+        if self.books_:
+            return self.books_
+        self.books_ = self.__parse_books()
+        return self.books_
+
+    def books_all() -> List[Book]:
+        if self.books_all_:
+            return self.books_all_
+        self.books_all_ = self.__parse_books_all()
+
+    def verses() -> List[Verse]:
+        if self.verses_:
+            return self.verses_
+        self.verses_ = self.__parse_verses()
