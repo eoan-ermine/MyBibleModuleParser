@@ -3,17 +3,39 @@ import sqlite3
 
 
 class Book:
-    def __init__(self, book_number, short_name, long_name, book_color, is_present=True, title=None, sorting_order=None):
-        self.book_number = book_number
-        self.short_name = short_name
-        self.long_name = long_name
-        self.book_color = book_color
-        self.is_present = is_present
-        self.title = title
-        self.sorting_order = sorting_order
+    def __init__(self, book_number: int, short_name: str, long_name: str, book_color: str,
+                 is_present: bool = True, title: str = None, sorting_order: str = None):
+        self.book_number_: int = int(book_number)
+        self.short_name_: str = short_name
+        self.long_name_: str = long_name
+        self.book_color_: str = book_color
+        self.is_present_: bool = bool(is_present)
+        self.title_: str = title
+        self.sorting_order_: int = int(sorting_order) if sorting_order else None
+
+    def book_number(self) -> int:
+        return self.book_number_
+
+    def short_name(self) -> str:
+        return self.short_name_
+
+    def long_name(self) -> str:
+        return self.long_name_
+
+    def book_color(self) -> str:
+        return self.book_color_
+
+    def is_present(self) -> bool:
+        return self.is_present_
+
+    def title(self) -> str:
+        return self.title_
+
+    def sorting_order(self) -> int:
+        return self.sorting_order_
 
     def __repr__(self):
-        return f"Book({self.book_number}, {self.short_name}, {self.long_name}, {self.book_color})"
+        return f"Book({self.book_number_}, {self.short_name_}, {self.long_name_}, {self.book_color_})"
 
 
 class Info:
@@ -82,19 +104,23 @@ class Info:
 
 
 class Verse:
-    def __init__(self, book_number, chapter, text):
-        self.book_number = book_number
-        self.chapter = chapter
-        self.text = text
+    def __init__(self, book_number: int, chapter: int, verse: int, text: str):
+        self.book_number_: int = int(book_number)
+        self.chapter_: int = int(chapter)
+        self.verse_: int = int(verse)
+        self.text_: str = text
 
-    def book_number(self):
-        return self.book_number
+    def book_number(self) -> int:
+        return self.book_number_
 
-    def chapter(self):
-        return self.chapter
+    def chapter(self) -> int:
+        return self.chapter_
 
-    def text(self):
-        return self.text
+    def verse(self) -> int:
+        return self.verse_
+
+    def text(self) -> str:
+        return self.text_
 
 
 def parse_books(filename) -> List[Book]:
