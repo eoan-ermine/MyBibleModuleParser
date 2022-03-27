@@ -24,3 +24,16 @@ def parse_books(filename) -> List[Book]:
         result.append(Book(book_number, short_name, long_name, book_color))
 
     return result
+
+
+def parse_books_all(filename) -> List[Book]:
+    con = sqlite3.connect(filename)
+    cur = con.cursor()
+
+    result = []
+    cur.execute("SELECT book_number, short_name, long_name, book_color"
+                " FROM books_all")
+    for (book_number, short_name, long_name, book_color) in cur.fetchall():
+        result.append(Book(book_number, short_name, long_name, book_color))
+    
+    return result
