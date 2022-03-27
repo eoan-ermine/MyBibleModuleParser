@@ -1,5 +1,6 @@
 from typing import List
 import sqlite3
+import re
 
 
 class Book:
@@ -110,6 +111,21 @@ class Verse:
         self.verse_: int = int(verse)
         self.text_: str = text
 
+    def __strip_tags(self, text = None) -> str:
+        if not text:
+            text = self.text_
+
+        text = re.sub("<[Smf]>([^<]+)</[Smf]>", "", text)
+        text = re.sub("<[iJet]>([^<]+)</[iJet]>", "\\1", text)
+        text = re.sub("<n>([^<]+)</n>", "[\\1]", text)
+
+        text = text.replace("<br/>", "").replace("<pb/>", "")
+
+        # Embedded subheadings aren't supported yet
+        text = re.sub("<h>([^<]+)</h>", "", text)
+
+        return text
+
     def book_number(self) -> int:
         return self.book_number_
 
@@ -119,7 +135,9 @@ class Verse:
     def verse(self) -> int:
         return self.verse_
 
-    def text(self) -> str:
+    def text(self, strip_tags=False) -> str:
+        if strip_tags:
+            return self.__strip_tags()
         return self.text_
 
 
@@ -133,7 +151,7 @@ class Module:
 
         self.info_ = None
 
-    def __parse_books(filename) -> List[Book]:
+    def __parse_books(self, filename) -> List[Book]:
         con = sqlite3.connect(filename)
         con.row_factory = sqlite3.Row
         cur = con.cursor()
@@ -149,7 +167,7 @@ class Module:
         return result
 
 
-    def __parse_books_all(filename) -> List[Book]:
+    def __parse_books_all(self, filename) -> List[Book]:
         con = sqlite3.connect(filename)
         con.row_factory = sqlite3.Row
         cur = con.cursor()
@@ -165,7 +183,7 @@ class Module:
         return result
 
 
-    def __parse_info(filename) -> Info:
+    def __parse_info(self, filename) -> Info:
         con = sqlite3.connect(filename)
         con.row_factory = sqlite3.Row
         cur = con.cursor()
@@ -178,7 +196,7 @@ class Module:
         )
 
 
-    def __parse_verses(filename) -> List[Verse]:
+    def __parse_verses(self, filename) -> List[Verse]:
         con = sqlite3.connect(filename)
         cur = con.cursor()
         cur.execute("SELECT book_number, chapter, verse, text"
@@ -190,27 +208,29 @@ class Module:
         
         return result
 
-    def filename() -> str:
+    def filename(self) -> str:
         return self.filename_
 
-    def info() -> Info:
+    def info(self) -> Info:
         if self.info_:
             return self.info_
-        self.info_ = self.__parse_info()
+        self.info_ = self.__parse_info(self.filename_)
         return self.info_
 
-    def books() -> List[Book]:
+    def books(self) -> List[Book]:
         if self.books_:
             return self.books_
-        self.books_ = self.__parse_books()
+        self.books_ = self.__parse_books(self.filename_)
         return self.books_
 
-    def books_all() -> List[Book]:
+    def books_all(self) -> List[Book]:
         if self.books_all_:
             return self.books_all_
-        self.books_all_ = self.__parse_books_all()
+        self.books_all_ = self.__parse_books_all(self.filename_)
+        return self.books_all_
 
-    def verses() -> List[Verse]:
+    def verses(self) -> List[Verse]:
         if self.verses_:
             return self.verses_
-        self.verses_ = self.__parse_verses()
+        self.verses_ = self.__parse_verses(self.filename_)
+        return self.verses_
