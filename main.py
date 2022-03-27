@@ -3,11 +3,14 @@ import sqlite3
 
 
 class Book:
-    def __init__(self, book_number, short_name, long_name, book_color):
+    def __init__(self, book_number, short_name, long_name, book_color, is_present=True, title=None, sorting_order=None):
         self.book_number = book_number
         self.short_name = short_name
         self.long_name = long_name
         self.book_color = book_color
+        self.is_present = is_present
+        self.title = title
+        self.sorting_order = sorting_order
 
     def __repr__(self):
         return f"Book({self.book_number}, {self.short_name}, {self.long_name}, {self.book_color})"
@@ -96,27 +99,33 @@ class Verse:
 
 def parse_books(filename) -> List[Book]:
     con = sqlite3.connect(filename)
+    con.row_factory = sqlite3.Row
     cur = con.cursor()
 
+    cursor = cur.execute('SELECT * FROM books LIMIT 1')
+    query_fields = [description[0] for description in cur.description]
+    cur.execute(f"SELECT {', '.join(query_fields)} FROM books")
+
     result = []
-    cur.execute("SELECT book_number, short_name, long_name, book_color"
-                " FROM books")
-    for (book_number, short_name, long_name, book_color) in cur.fetchall():
-        result.append(Book(book_number, short_name, long_name, book_color))
+    for row in cur.fetchall():
+        result.append(Book(**{key: row[key] for key in row.keys()}))
 
     return result
 
 
 def parse_books_all(filename) -> List[Book]:
     con = sqlite3.connect(filename)
+    con.row_factory = sqlite3.Row
     cur = con.cursor()
 
+    cursor = cur.execute('SELECT * FROM books LIMIT 1')
+    query_fields = [description[0] for description in cur.description]
+    cur.execute(f"SELECT {', '.join(query_fields)} FROM books_all")
+
     result = []
-    cur.execute("SELECT book_number, short_name, long_name, book_color"
-                " FROM books_all")
-    for (book_number, short_name, long_name, book_color) in cur.fetchall():
-        result.append(Book(book_number, short_name, long_name, book_color))
-    
+    for row in cur.fetchall():
+        result.append(Book(**{key: row[key] for key in row.keys()}))
+
     return result
 
 
