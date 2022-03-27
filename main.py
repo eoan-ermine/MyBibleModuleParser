@@ -113,7 +113,7 @@ class Verse:
         self.text_: str = text
         self.strip_tags_ = strip_tags
         if strip_tags:
-            self.text = __strip_tags()
+            self.text_ = self.__strip_tags()
 
     def __strip_tags(self, text = None) -> str:
         if not text:
@@ -128,7 +128,7 @@ class Verse:
         # Embedded subheadings aren't supported yet
         text = re.sub("<h>([^<]+)</h>", "", text)
 
-        return text
+        return text.strip()
 
     def strip_tags(self) -> bool:
         return self.strip_tags_
@@ -147,10 +147,17 @@ class Verse:
             return self.__strip_tags()
         return self.text_
 
+    def __repr__(self) -> str:
+        return f"[{self.book_number_}.{self.chapter_}:{self.verse_}] {self.text_}"
+
 
 class Module:
     def __init__(self, filename):
         self.filename_ = filename
+
+        self.connection = sqlite3.connect(filename)
+        self.connection.row_factory = sqlite3.Row
+        self.cursor = self.connection.cursor()
 
         self.books_ = None
         self.books_all_ = None
@@ -159,59 +166,45 @@ class Module:
         self.info_ = None
 
     def __parse_books(self, filename) -> List[Book]:
-        con = sqlite3.connect(filename)
-        con.row_factory = sqlite3.Row
-        cur = con.cursor()
-
-        cursor = cur.execute('SELECT * FROM books LIMIT 1')
-        query_fields = [description[0] for description in cur.description]
-        cur.execute(f"SELECT {', '.join(query_fields)} FROM books")
+        self.cursor.execute('SELECT * FROM books LIMIT 1')
+        query_fields = [description[0] for description in self.cursor.description]
+        self.cursor.execute(f"SELECT {', '.join(query_fields)} FROM books")
 
         result = []
-        for row in cur.fetchall():
+        for row in self.cursor.fetchall():
             result.append(Book(**{key: row[key] for key in row.keys()}))
 
         return result
 
 
     def __parse_books_all(self, filename) -> List[Book]:
-        con = sqlite3.connect(filename)
-        con.row_factory = sqlite3.Row
-        cur = con.cursor()
-
-        cursor = cur.execute('SELECT * FROM books LIMIT 1')
-        query_fields = [description[0] for description in cur.description]
-        cur.execute(f"SELECT {', '.join(query_fields)} FROM books_all")
+        self.cursor.execute('SELECT * FROM books LIMIT 1')
+        query_fields = [description[0] for description in self.cursor.description]
+        self.cursor.execute(f"SELECT {', '.join(query_fields)} FROM books_all")
 
         result = []
-        for row in cur.fetchall():
+        for row in self.cursor.fetchall():
             result.append(Book(**{key: row[key] for key in row.keys()}))
 
         return result
 
 
     def __parse_info(self, filename) -> Info:
-        con = sqlite3.connect(filename)
-        con.row_factory = sqlite3.Row
-        cur = con.cursor()
-
-        cur.execute("SELECT name, value FROM info")
+        self.cursor.execute("SELECT name, value FROM info")
         return Info(
             **{
-                name: value for (name, value) in cur.fetchall()
+                name: value for (name, value) in self.cursor.fetchall()
             }
         )
 
 
     def __parse_verses(self, filename, strip_tags = False) -> List[Verse]:
-        con = sqlite3.connect(filename)
-        cur = con.cursor()
-        cur.execute("SELECT book_number, chapter, verse, text"
+        self.cursor.execute("SELECT book_number, chapter, verse, text"
                     " FROM verses")
         
         result = []
-        for (book_number, chapter, verse, text) in cur.fetchall():
-            result.append(Verse(book_number, chapter, verse, text, strip_tags))
+        for row in self.cursor.fetchall():
+            result.append(Verse(**{key: row[key] for key in row.keys()}, strip_tags = strip_tags))
         
         return result
 
@@ -241,3 +234,13 @@ class Module:
             return self.verses_
         self.verses_ = self.__parse_verses(self.filename_, strip_tags)
         return self.verses_
+
+    def strip_tags(self):
+        verses = self.verses(strip_tags = True)
+
+        for verse in verses:
+            self.cursor.execute(f"UPDATE verses SET text = ? WHERE "
+                         "book_number = ? AND chapter = ? AND verse = ?",
+                         (verse.text(), verse.book_number(), verse.chapter(), verse.verse())
+                        )
+        self.connection.commit()
