@@ -78,6 +78,22 @@ class Info:
         return self.configuration.__repr__()
 
 
+class Verse:
+    def __init__(self, book_number, chapter, text):
+        self.book_number = book_number
+        self.chapter = chapter
+        self.text = text
+
+    def book_number(self):
+        return self.book_number
+
+    def chapter(self):
+        return self.chapter
+
+    def text(self):
+        return self.text
+
+
 def parse_books(filename) -> List[Book]:
     con = sqlite3.connect(filename)
     cur = con.cursor()
@@ -115,3 +131,16 @@ def parse_info(filename) -> Info:
             name: value for (name, value) in cur.fetchall()
         }
     )
+
+
+def parse_verses(filename) -> List[Verse]:
+    con = sqlite3.connect(filename)
+    cur = con.cursor()
+    cur.execute("SELECT book_number, chapter, verse, text"
+                " FROM verses")
+    
+    result = []
+    for (book_number, chapter, verse, text) in cur.fetchall():
+        result.append(Verse(book_number, chapter, verse, text))
+    
+    return result
