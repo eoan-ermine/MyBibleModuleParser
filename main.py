@@ -13,7 +13,7 @@ class Book:
         return f"Book({self.book_number}, {self.short_name}, {self.long_name}, {self.book_color})"
 
 
-class Bible:
+class Info:
     def __init__(self, **kwargs):
         self.configuration = kwargs
 
@@ -74,6 +74,9 @@ class Bible:
     def morphology_topic_reference(self, language=None):
         return self.configuration.get("morphology_topic_reference" + ("_" + language) if language else "", None)
 
+    def __repr__(self):
+        return self.configuration.__repr__()
+
 
 def parse_books(filename) -> List[Book]:
     con = sqlite3.connect(filename)
@@ -99,3 +102,16 @@ def parse_books_all(filename) -> List[Book]:
         result.append(Book(book_number, short_name, long_name, book_color))
     
     return result
+
+
+def parse_info(filename) -> Info:
+    con = sqlite3.connect(filename)
+    con.row_factory = sqlite3.Row
+    cur = con.cursor()
+
+    cur.execute("SELECT name, value FROM info")
+    return Info(
+        **{
+            name: value for (name, value) in cur.fetchall()
+        }
+    )
