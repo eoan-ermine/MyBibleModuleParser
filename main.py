@@ -105,11 +105,15 @@ class Info:
 
 
 class Verse:
-    def __init__(self, book_number: int, chapter: int, verse: int, text: str):
+    def __init__(self, book_number: int, chapter: int, verse: int, text: str, strip_tags = False):
         self.book_number_: int = int(book_number)
         self.chapter_: int = int(chapter)
         self.verse_: int = int(verse)
+
         self.text_: str = text
+        self.strip_tags_ = strip_tags
+        if strip_tags:
+            self.text = __strip_tags()
 
     def __strip_tags(self, text = None) -> str:
         if not text:
@@ -125,6 +129,9 @@ class Verse:
         text = re.sub("<h>([^<]+)</h>", "", text)
 
         return text
+
+    def strip_tags(self) -> bool:
+        return self.strip_tags_
 
     def book_number(self) -> int:
         return self.book_number_
@@ -196,7 +203,7 @@ class Module:
         )
 
 
-    def __parse_verses(self, filename) -> List[Verse]:
+    def __parse_verses(self, filename, strip_tags = False) -> List[Verse]:
         con = sqlite3.connect(filename)
         cur = con.cursor()
         cur.execute("SELECT book_number, chapter, verse, text"
@@ -204,7 +211,7 @@ class Module:
         
         result = []
         for (book_number, chapter, verse, text) in cur.fetchall():
-            result.append(Verse(book_number, chapter, verse, text))
+            result.append(Verse(book_number, chapter, verse, text, strip_tags))
         
         return result
 
@@ -229,8 +236,8 @@ class Module:
         self.books_all_ = self.__parse_books_all(self.filename_)
         return self.books_all_
 
-    def verses(self) -> List[Verse]:
-        if self.verses_:
+    def verses(self, strip_tags = False) -> List[Verse]:
+        if self.verses_ and self.verses_.strip_tags() == strip_tags:
             return self.verses_
-        self.verses_ = self.__parse_verses(self.filename_)
+        self.verses_ = self.__parse_verses(self.filename_, strip_tags)
         return self.verses_
