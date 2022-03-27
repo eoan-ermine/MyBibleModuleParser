@@ -247,6 +247,3 @@ class Module:
 
     def __del__(self):
         self.connection.close()
-
-module = Module("RST+.SQLite3")
-module.strip_tags()
