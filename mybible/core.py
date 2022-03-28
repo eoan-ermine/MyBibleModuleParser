@@ -171,7 +171,7 @@ class Module:
     def __init__(self, filename):
         self.filename_ = filename
 
-        self.connection = sqlite3.connect(filename)
+        self.connection = sqlite3.connect(filename, check_same_thread=False)
         self.connection.row_factory = sqlite3.Row
         self.cursor = self.connection.cursor()
 
