@@ -110,10 +110,12 @@ class Verse:
         self.chapter_: int = int(chapter)
         self.verse_: int = int(verse)
 
-        self.text_: str = text
-        self.strip_tags_ = strip_tags
         if strip_tags:
-            self.text_ = self.__strip_tags()
+            self.text_ = self.__strip_tags(text)
+        else:
+            self.text_ = text
+        self.strip_tags_ = strip_tags
+
 
     def __strip_tags(self, text = None) -> str:
         if not text:
@@ -153,10 +155,11 @@ class Verse:
 
 class Verses:
     def __init__(self, verses, strip_tags):
+        self.verses_list = verses
         self.verses = {}
         self.strip_tags_ = strip_tags
 
-        for verse in verses:
+        for verse in self.verses_list:
             book_number, chapter, verse_num = verse.book_number(), verse.chapter(), verse.verse()
             
             if book_number not in self.verses:
@@ -170,6 +173,9 @@ class Verses:
 
     def get(self, book_number, chapter, verse):
         return self.verses[book_number][chapter][verse]
+
+    def __iter__(self):
+        return iter(self.verses_list)
 
 
 class Module:
