@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 import sqlite3
 import re
 
@@ -171,7 +171,14 @@ class Verses:
     def strip_tags(self) -> bool:
         return self.strip_tags_
 
-    def get(self, book_number, chapter, verse):
+    def contains(self, book_number, chapter, verse) -> bool:
+        if book_number in self.verses:
+            if chapter in self.verses[book_number]:
+                if verse in self.verses[book_number][chapter]:
+                    return True
+        return False
+
+    def get(self, book_number, chapter, verse) -> Verse:
         return self.verses[book_number][chapter][verse]
 
     def __iter__(self):
