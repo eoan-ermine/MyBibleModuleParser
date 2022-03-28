@@ -250,7 +250,7 @@ class Module:
         )
 
 
-    def __parse_verses(self, filename, strip_tags = False) -> List[Verse]:
+    def __parse_verses(self, filename, strip_tags = False) -> Verses:
         self.cursor.execute("SELECT book_number, chapter, verse, text"
                     " FROM verses")
         
