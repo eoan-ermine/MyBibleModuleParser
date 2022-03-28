@@ -56,6 +56,9 @@ class Books:
     def __iter__(self):
         return iter(self.books.values())
 
+    def __len__(self):
+        return len(self.books.values())
+
 
 class Info:
     def __init__(self, **kwargs):
@@ -205,6 +208,9 @@ class Verses:
 
     def __iter__(self):
         return iter(self.verses_list)
+
+    def __len__(self):
+        return len(self.verses_list)
 
 
 class Module:
