@@ -151,6 +151,22 @@ class Verse:
         return f"[{self.book_number_}.{self.chapter_}:{self.verse_}] {self.text_}"
 
 
+class Verses:
+    def __init__(self, verses):
+        self.verses = {}
+        for verse in verses:
+            book_number, chapter, verse_num = verse.book_number(), verse.chapter(), verse.verse()
+            
+            if book_number not in self.verses:
+                self.verses[book_number] = dict()
+            if chapter not in self.verses[book_number]:
+                self.verses[book_number][chapter] = dict()
+            self.verses[book_number][chapter][verse_num] = verse
+
+    def get(self, book_number, chapter, verse):
+        return self.verses[book_number][chapter][verse]
+
+
 class Module:
     def __init__(self, filename):
         self.filename_ = filename
@@ -206,7 +222,7 @@ class Module:
         for row in self.cursor.fetchall():
             result.append(Verse(**{key: row[key] for key in row.keys()}, strip_tags = strip_tags))
         
-        return result
+        return Verses(result)
 
     def filename(self) -> str:
         return self.filename_
