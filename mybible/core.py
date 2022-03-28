@@ -192,12 +192,12 @@ class Verses:
     def strip_tags(self) -> bool:
         return self.strip_tags_
 
-    def contains(self, book_number, chapter, verse) -> bool:
-        if book_number in self.verses:
-            if chapter in self.verses[book_number]:
-                if verse in self.verses[book_number][chapter]:
-                    return True
-        return False
+    def contains(self, book_number, chapter = None, verse = None) -> bool:
+        if not chapter and not verse:
+            return book_number in self.verses
+        if not verse:
+            return book_number in self.verses and chapter in self.verses[book_number]
+        return book_number in self.verses and chapter in self.verses[book_number] and verse in self.verses[book_number][chapter]
 
     def get(self, book_number, chapter = None, verse = None) -> Union[Verse, Dict[int, Verse], Dict[int, Dict[int, Verse]]]:
         if not chapter and not verse:
