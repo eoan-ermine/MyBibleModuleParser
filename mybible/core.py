@@ -152,8 +152,10 @@ class Verse:
 
 
 class Verses:
-    def __init__(self, verses):
+    def __init__(self, verses, strip_tags):
         self.verses = {}
+        self.strip_tags_ = strip_tags
+
         for verse in verses:
             book_number, chapter, verse_num = verse.book_number(), verse.chapter(), verse.verse()
             
@@ -162,6 +164,9 @@ class Verses:
             if chapter not in self.verses[book_number]:
                 self.verses[book_number][chapter] = dict()
             self.verses[book_number][chapter][verse_num] = verse
+
+    def strip_tags(self) -> bool:
+        return self.strip_tags_
 
     def get(self, book_number, chapter, verse):
         return self.verses[book_number][chapter][verse]
@@ -222,7 +227,7 @@ class Module:
         for row in self.cursor.fetchall():
             result.append(Verse(**{key: row[key] for key in row.keys()}, strip_tags = strip_tags))
         
-        return Verses(result)
+        return Verses(result, strip_tags)
 
     def filename(self) -> str:
         return self.filename_
