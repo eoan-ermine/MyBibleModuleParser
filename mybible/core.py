@@ -1,6 +1,7 @@
 from typing import List, Optional
 import sqlite3
 import re
+from collections import OrderedDict
 
 
 class Book:
@@ -37,6 +38,23 @@ class Book:
 
     def __repr__(self):
         return f"Book({self.book_number_}, {self.short_name_}, {self.long_name_}, {self.book_color_})"
+
+
+class Books:
+    def __init__(self, books):
+        self.books: OrderedDict = OrderedDict()
+
+        for book in books:
+            self.books[book.book_number()] = book
+
+    def contains(self, book):
+        return book in self.books
+
+    def get(self, book):
+        return self.books[book]
+
+    def __iter__(self):
+        return iter(self.books.values())
 
 
 class Info:
@@ -199,7 +217,7 @@ class Module:
 
         self.info_ = None
 
-    def __parse_books(self, filename) -> List[Book]:
+    def __parse_books(self, filename) -> Books:
         self.cursor.execute('SELECT * FROM books LIMIT 1')
         query_fields = [description[0] for description in self.cursor.description]
         self.cursor.execute(f"SELECT {', '.join(query_fields)} FROM books")
@@ -208,10 +226,10 @@ class Module:
         for row in self.cursor.fetchall():
             result.append(Book(**{key: row[key] for key in row.keys()}))
 
-        return result
+        return Books(result)
 
 
-    def __parse_books_all(self, filename) -> List[Book]:
+    def __parse_books_all(self, filename) -> Books:
         self.cursor.execute('SELECT * FROM books LIMIT 1')
         query_fields = [description[0] for description in self.cursor.description]
         self.cursor.execute(f"SELECT {', '.join(query_fields)} FROM books_all")
@@ -220,7 +238,7 @@ class Module:
         for row in self.cursor.fetchall():
             result.append(Book(**{key: row[key] for key in row.keys()}))
 
-        return result
+        return Books(result)
 
 
     def __parse_info(self, filename) -> Info:
