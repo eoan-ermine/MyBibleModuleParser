@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Dict, Union
 import sqlite3
 import re
 from collections import OrderedDict
@@ -196,7 +196,11 @@ class Verses:
                     return True
         return False
 
-    def get(self, book_number, chapter, verse) -> Verse:
+    def get(self, book_number, chapter = None, verse = None) -> Union[Verse, Dict[int, Verse], Dict[int, Dict[int, Verse]]]:
+        if not chapter and not verse:
+            return self.verses[book_number]
+        if not verse:
+            return self.verses[book_number][chapter]
         return self.verses[book_number][chapter][verse]
 
     def __iter__(self):
