@@ -1,4 +1,4 @@
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Optional
 import sqlite3
 import re
 from collections import OrderedDict
@@ -255,3 +255,26 @@ class Module:
 
     def __del__(self):
         self.connection.close()
+
+
+class Modules:
+    def __init__(self, filenames):
+        modules = [
+            Module(filename) for filename in filenames
+        ]
+
+    def search(self, predicate):
+        for module in modules:
+            if predicate(module):
+                return module
+
+    def filter(self, predicate):
+        for module in modules:
+            if predicate(module):
+                yield module
+
+    def __iter__(self):
+        return iter(self.modules)
+
+    def __len__(self):
+        return len(self.modules)
