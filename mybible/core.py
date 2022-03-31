@@ -143,7 +143,7 @@ class Verses:
             return book_number in self.verses
         if not verse:
             return book_number in self.verses and chapter in self.verses[book_number]
-        return book_number in self.verses and chapter in self.verses[book_number] and len(self.verses[book_number][chapter]) <= verse
+        return book_number in self.verses and chapter in self.verses[book_number] and (verse >= 1 and verse <= len(self.verses[book_number][chapter]))
 
     def get(self, book_number, chapter = None, verse = None) -> Union[Verse, Dict[int, Verse], Dict[int, Dict[int, Verse]]]:
         if not chapter and not verse:
