@@ -2,7 +2,7 @@ from typing import List, Dict, Union, Optional
 import sqlite3
 import re
 from collections import OrderedDict
-from utils import Range
+from mybible.utils import Range
 
 class Book:
     def __init__(self, book_number: int, short_name: str, long_name: str, book_color: str,
@@ -152,7 +152,7 @@ class Verses:
             return self.verses[book_number][chapter]
 
         if isinstance(verse, Range):
-            return self.verses[book_number][chapter][verse.start() - 1:verse.end()]
+            return self.verses[book_number][chapter][verse.start() - 1:verse.end() - 1]
         return self.verses[book_number][chapter][verse - 1]
 
     def __iter__(self):
