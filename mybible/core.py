@@ -85,7 +85,7 @@ class Verse:
 
 
     def __strip_tags(self, text = None) -> str:
-        if not text:
+        if text is None:
             text = self.text_
 
         text = re.sub("<[Smf]>([^<]+)</[Smf]>", "", text)
@@ -139,16 +139,16 @@ class Verses:
         return self.strip_tags_
 
     def contains(self, book_number, chapter = None, verse = None) -> bool:
-        if not chapter and not verse:
+        if chapter is None and verse is None:
             return book_number in self.verses
-        if not verse:
+        if verse is None:
             return book_number in self.verses and chapter in self.verses[book_number]
         return book_number in self.verses and chapter in self.verses[book_number] and (verse >= 1 and verse <= len(self.verses[book_number][chapter]))
 
     def get(self, book_number, chapter = None, verse = None) -> Union[Verse, Dict[int, Verse], Dict[int, Dict[int, Verse]]]:
-        if not chapter and not verse:
+        if chapter is None and verse is None:
             return self.verses[book_number]
-        if not verse:
+        if verse is None:
             return self.verses[book_number][chapter]
 
         if isinstance(verse, Range):
