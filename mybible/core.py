@@ -2,7 +2,7 @@ from typing import List, Dict, Union, Optional
 import sqlite3
 import re
 from collections import OrderedDict
-
+from utils import Range
 
 class Book:
     def __init__(self, book_number: int, short_name: str, long_name: str, book_color: str,
@@ -132,8 +132,8 @@ class Verses:
             if book_number not in self.verses:
                 self.verses[book_number] = dict()
             if chapter not in self.verses[book_number]:
-                self.verses[book_number][chapter] = dict()
-            self.verses[book_number][chapter][verse_num] = verse
+                self.verses[book_number][chapter] = list()
+            self.verses[book_number][chapter].append(verse)
 
     def strip_tags(self) -> bool:
         return self.strip_tags_
@@ -143,14 +143,17 @@ class Verses:
             return book_number in self.verses
         if not verse:
             return book_number in self.verses and chapter in self.verses[book_number]
-        return book_number in self.verses and chapter in self.verses[book_number] and verse in self.verses[book_number][chapter]
+        return book_number in self.verses and chapter in self.verses[book_number] and len(self.verses[book_number][chapter]) <= verse
 
     def get(self, book_number, chapter = None, verse = None) -> Union[Verse, Dict[int, Verse], Dict[int, Dict[int, Verse]]]:
         if not chapter and not verse:
             return self.verses[book_number]
         if not verse:
             return self.verses[book_number][chapter]
-        return self.verses[book_number][chapter][verse]
+
+        if isinstance(verse, Range):
+            return self.verses[book_number][chapter][verse.start() - 1:verse.end()]
+        return self.verses[book_number][chapter][verse - 1]
 
     def __iter__(self):
         return iter(self.verses_list)
